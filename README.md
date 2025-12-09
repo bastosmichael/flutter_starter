@@ -205,7 +205,6 @@ flutter pub get
 
 - **flutter_riverpod**: State management
 - **go_router**: Routing and navigation
-- **flutter_adaptive_scaffold**: Responsive layouts
 - **universal_io**: Cross-platform IO operations
 
 ## 🤝 Contributing

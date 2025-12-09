@@ -114,7 +114,6 @@ lib/
 - `cupertino_icons` (^1.0.6) - iOS-style icons
 - `flutter_riverpod` (^2.4.9) - State management
 - `go_router` (^13.0.0) - Declarative routing
-- `flutter_adaptive_scaffold` (^0.1.9) - Responsive layouts
 - `universal_io` (^2.2.2) - Cross-platform IO
 
 ### Development Dependencies
@@ -175,10 +174,10 @@ flutter format .               # Format code
 
 ## File Statistics
 
-- **Total Project Files**: 27+ source files
+- **Total Project Files**: 39+ source files
 - **Lines of Code**: ~3,500+ lines
 - **Platforms Supported**: 6 (Android, iOS, Web, Windows, macOS, Linux)
-- **Dependencies**: 6 production + 2 development
+- **Dependencies**: 4 production + 2 development
 - **Screens**: 2 (Home, About) + extensible architecture
 
 ## Architecture Highlights
