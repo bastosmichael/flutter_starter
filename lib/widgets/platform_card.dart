@@ -1,6 +1,6 @@
-/// A reusable card widget with an icon and title.
-/// 
-/// Used throughout the app to display grouped information in a consistent style.
+// A reusable card widget with an icon and title.
+// 
+// Used throughout the app to display grouped information in a consistent style.
 
 import 'package:flutter/material.dart';
 

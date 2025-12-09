@@ -1,18 +1,18 @@
-/// Flutter Starter - A cross-platform application supporting mobile, desktop, and web.
-/// 
-/// This app demonstrates:
-/// - Multi-platform support (iOS, Android, Web, Windows, macOS, Linux)
-/// - Material Design 3
-/// - Responsive layouts
-/// - Navigation with GoRouter
-/// - State management with Riverpod
+// Flutter Starter - A cross-platform application supporting mobile, desktop, and web.
+// 
+// This app demonstrates:
+// - Multi-platform support (iOS, Android, Web, Windows, macOS, Linux)
+// - Material Design 3
+// - Responsive layouts
+// - Navigation with GoRouter
+// - State management with Riverpod
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'screens/home_screen.dart';
 import 'screens/about_screen.dart';
-import 'utils/platform_info.dart';
+
 
 /// Entry point of the application.
 void main() {
