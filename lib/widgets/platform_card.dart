@@ -43,10 +43,12 @@ class PlatformCard extends StatelessWidget {
               children: [
                 Icon(icon, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
