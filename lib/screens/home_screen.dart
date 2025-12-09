@@ -147,7 +147,7 @@ class HomeScreen extends StatelessWidget {
       icon: Icons.star,
       children: [
         _buildFeatureItem('Material Design 3', Icons.palette),
-        _buildFeatureItem('Responsive Layout', Icons.responsive_layout),
+        _buildFeatureItem('Responsive Layout', Icons.view_quilt),
         _buildFeatureItem('Navigation', Icons.navigation),
         _buildFeatureItem('State Management', Icons.settings_input_component),
         _buildFeatureItem('Dark Mode Support', Icons.dark_mode),

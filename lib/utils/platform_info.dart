@@ -1,7 +1,7 @@
-/// Platform detection utilities for cross-platform Flutter applications.
-/// 
-/// Provides static getters to detect the current platform and platform type.
-/// Works across all Flutter platforms: mobile, desktop, and web.
+// Platform detection utilities for cross-platform Flutter applications.
+// 
+// Provides static getters to detect the current platform and platform type.
+// Works across all Flutter platforms: mobile, desktop, and web.
 
 import 'package:flutter/foundation.dart';
 import 'package:universal_io/io.dart';

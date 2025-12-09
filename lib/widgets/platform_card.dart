@@ -1,6 +1,6 @@
-/// A reusable card widget with an icon and title.
-/// 
-/// Used throughout the app to display grouped information in a consistent style.
+// A reusable card widget with an icon and title.
+// 
+// Used throughout the app to display grouped information in a consistent style.
 
 import 'package:flutter/material.dart';
 
@@ -43,10 +43,12 @@ class PlatformCard extends StatelessWidget {
               children: [
                 Icon(icon, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
