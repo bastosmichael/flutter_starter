@@ -1,0 +1,8 @@
+{
+    "name": "flutter_mui_starter_web",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Web dependencies for Flutter MUI Starter",
+    "dependencies": {},
+    "devDependencies": {}
+}
