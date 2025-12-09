@@ -1,0 +1,55 @@
+version: 2
+updates:
+  # ============================================================================
+  # FLUTTER / DART (ROOT)
+  # ============================================================================
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  # ============================================================================
+  # ANDROID (NATIVE)
+  # ============================================================================
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  # ============================================================================
+  # GITHUB ACTIONS (CI/CD)
+  # ============================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  # ============================================================================
+  # IOS (NATIVE)
+  # ============================================================================
+  - package-ecosystem: "bundler"
+    directory: "/ios"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  # ============================================================================
+  # MACOS (NATIVE)
+  # ============================================================================
+  - package-ecosystem: "bundler"
+    directory: "/macos"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+
+  # ============================================================================
+  # WEB (NATIVE JS)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
