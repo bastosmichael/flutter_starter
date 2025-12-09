@@ -4,6 +4,13 @@ cmake_minimum_required(VERSION 3.10)
 set(EPHEMERAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ephemeral")
 set(WRAPPER_ROOT "${EPHEMERAL_DIR}/cpp_client_wrapper")
 
+if(NOT DEFINED FLUTTER_ROOT)
+  message(FATAL_ERROR "FLUTTER_ROOT must be defined when configuring the Flutter Linux runner.")
+endif()
+
+# Ensure the ephemeral directory exists before generating artifacts.
+file(MAKE_DIRECTORY "${EPHEMERAL_DIR}")
+
 # Flutter libraries and artifacts produced by the toolchain.
 set(FLUTTER_LIBRARY "${EPHEMERAL_DIR}/libflutter_linux_gtk.so")
 set(FLUTTER_ICU_DATA_FILE "${EPHEMERAL_DIR}/icudtl.dat")
@@ -35,6 +42,23 @@ set(FLUTTER_VM_SNAPSHOT_INSTRUCTIONS "${EPHEMERAL_DIR}/vm_snapshot_instr")
 set(FLUTTER_ISOLATE_SNAPSHOT_DATA "${EPHEMERAL_DIR}/isolate_snapshot_data")
 set(FLUTTER_ISOLATE_SNAPSHOT_INSTRUCTIONS "${EPHEMERAL_DIR}/isolate_snapshot_instr")
 
+# Flutter build configuration used when invoking the tool backend.
+set(FLUTTER_TARGET_PLATFORM "linux-x64" CACHE STRING "")
+set(FLUTTER_BUILD_MODE "$<IF:$<CONFIG:Debug>,debug,$<IF:$<CONFIG:Profile>,profile,release>>" CACHE STRING "")
+set(FLUTTER_TARGET_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/main.dart" CACHE STRING "")
+set(FLUTTER_ASSET_DIR "${CMAKE_CURRENT_BINARY_DIR}/flutter_assets" CACHE STRING "")
+
+# Flutter tool runner used to materialize the engine and snapshot artifacts.
+set(FLUTTER_TOOL "${FLUTTER_ROOT}/packages/flutter_tools/bin/tool_backend.sh")
+set(FLUTTER_TOOL_ENVIRONMENT
+  "FLUTTER_ROOT=${FLUTTER_ROOT}"
+  "PROJECT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../.."
+  "FLUTTER_TARGET=${FLUTTER_TARGET_FILE}"
+  "FLUTTER_TARGET_PLATFORM=${FLUTTER_TARGET_PLATFORM}"
+  "FLUTTER_BUILD_MODE=${FLUTTER_BUILD_MODE}"
+  "FLUTTER_ASSET_DIR=${FLUTTER_ASSET_DIR}"
+)
+
 # Export important paths back to the parent scope so the runner CMakeLists
 # can consume them when wiring up install rules.
 set(FLUTTER_LIBRARY "${FLUTTER_LIBRARY}" PARENT_SCOPE)
@@ -53,6 +77,23 @@ pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE ${FLUTTER_LIBRARY_HEADERS})
 target_link_libraries(flutter INTERFACE ${FLUTTER_LIBRARY_LINK_LIBRARIES})
+
+# Build the Flutter artifacts on demand using the Flutter backend tool.
+set(GENERATED_STAMP "${EPHEMERAL_DIR}/flutter_linux_gtk.stamp")
+add_custom_command(
+  OUTPUT
+    "${FLUTTER_LIBRARY}"
+    "${FLUTTER_ICU_DATA_FILE}"
+    "${FLUTTER_VM_SNAPSHOT_DATA}"
+    "${FLUTTER_VM_SNAPSHOT_INSTRUCTIONS}"
+    "${FLUTTER_ISOLATE_SNAPSHOT_DATA}"
+    "${FLUTTER_ISOLATE_SNAPSHOT_INSTRUCTIONS}"
+    "${GENERATED_STAMP}"
+  COMMAND ${CMAKE_COMMAND} -E env ${FLUTTER_TOOL_ENVIRONMENT}
+    "${FLUTTER_TOOL}" ${FLUTTER_TARGET_PLATFORM} ${FLUTTER_BUILD_MODE}
+  COMMAND ${CMAKE_COMMAND} -E touch "${GENERATED_STAMP}"
+  VERBATIM
+)
 
 add_library(flutter_wrapper_plugin STATIC IMPORTED)
 set_target_properties(flutter_wrapper_plugin PROPERTIES
@@ -78,6 +119,11 @@ endfunction()
 add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"
   "${FLUTTER_ICU_DATA_FILE}"
+  "${FLUTTER_VM_SNAPSHOT_DATA}"
+  "${FLUTTER_VM_SNAPSHOT_INSTRUCTIONS}"
+  "${FLUTTER_ISOLATE_SNAPSHOT_DATA}"
+  "${FLUTTER_ISOLATE_SNAPSHOT_INSTRUCTIONS}"
+  "${GENERATED_STAMP}"
 )
 add_dependencies(flutter flutter_assemble)
 
