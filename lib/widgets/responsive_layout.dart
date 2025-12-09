@@ -1,5 +1,24 @@
+/// Responsive layout widget that adapts to different screen sizes.
+/// 
+/// Provides different layouts for mobile, tablet, and desktop breakpoints.
+
 import 'package:flutter/material.dart';
 
+/// A widget that provides responsive layouts for different screen sizes.
+/// 
+/// Breakpoints:
+/// - Mobile: < 600px width
+/// - Tablet: 600px - 1199px width
+/// - Desktop: >= 1200px width
+/// 
+/// Example:
+/// ```dart
+/// ResponsiveLayout(
+///   mobile: MobileLayout(),
+///   tablet: TabletLayout(),
+///   desktop: DesktopLayout(),
+/// )
+/// ```
 class ResponsiveLayout extends StatelessWidget {
   final Widget mobile;
   final Widget? tablet;

@@ -1,5 +1,22 @@
+/// A reusable card widget with an icon and title.
+/// 
+/// Used throughout the app to display grouped information in a consistent style.
+
 import 'package:flutter/material.dart';
 
+/// A Material Design card widget with icon header and custom content.
+/// 
+/// Example:
+/// ```dart
+/// PlatformCard(
+///   title: 'Features',
+///   icon: Icons.star,
+///   children: [
+///     Text('Feature 1'),
+///     Text('Feature 2'),
+///   ],
+/// )
+/// ```
 class PlatformCard extends StatelessWidget {
   final String title;
   final IconData icon;

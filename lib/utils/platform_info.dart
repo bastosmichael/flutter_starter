@@ -1,6 +1,21 @@
+/// Platform detection utilities for cross-platform Flutter applications.
+/// 
+/// Provides static getters to detect the current platform and platform type.
+/// Works across all Flutter platforms: mobile, desktop, and web.
+
 import 'package:flutter/foundation.dart';
 import 'package:universal_io/io.dart';
 
+/// Utility class for detecting the current platform.
+/// 
+/// Example usage:
+/// ```dart
+/// if (PlatformInfo.isWeb) {
+///   print('Running on web');
+/// } else if (PlatformInfo.isMobile) {
+///   print('Running on mobile: ${PlatformInfo.platformName}');
+/// }
+/// ```
 class PlatformInfo {
   // Platform checks
   static bool get isWeb => kIsWeb;
