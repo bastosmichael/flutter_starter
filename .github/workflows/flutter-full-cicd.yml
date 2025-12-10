@@ -222,9 +222,11 @@ jobs:
           - runner: macos-15-intel
             arch: x64
             label: Intel
+            slug: intel
           - runner: macos-latest
             arch: arm64
             label: Apple Silicon
+            slug: apple-silicon
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -267,15 +269,15 @@ jobs:
         run: |
           cd build/macos/Build/Products/Release
           app_path=$(ls *.app | head -n 1)
-          zip -rq ../../../../macos-${{ matrix.label }}.zip "$app_path"
+          zip -rq ../../../../macos-${{ matrix.slug }}.zip "$app_path"
 
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.label }}-apple
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.slug }}-apple
           path: |
             ios-Runner.zip
-            macos-${{ matrix.label }}.zip
+            macos-${{ matrix.slug }}.zip
 
   windows-build:
     name: Build (Windows)
