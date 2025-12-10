@@ -25,10 +25,36 @@ env:
   ARTIFACT_PREFIX: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
 
 jobs:
+  cleanup-pr-artifacts:
+    name: Cleanup PR Artifacts
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete PR artifacts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prefix = `pr-${context.payload.pull_request.number}`;
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            for (const artifact of artifacts) {
+              if (artifact.name && artifact.name.startsWith(prefix)) {
+                core.info(`Deleting artifact ${artifact.name}`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
+
   lint:
     name: Lint (Flutter)
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -60,7 +86,6 @@ jobs:
     name: Test (Flutter)
     runs-on: ubuntu-latest
     needs: lint
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -92,7 +117,6 @@ jobs:
     name: Build (Linux & Web)
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -155,7 +179,6 @@ jobs:
     name: Build (Android)
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -215,7 +238,6 @@ jobs:
     name: Build (iOS & macOS - ${{ matrix.label }})
     runs-on: ${{ matrix.runner }}
     needs: test
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     strategy:
       fail-fast: false
       matrix:
@@ -293,7 +315,6 @@ jobs:
     name: Build (Windows)
     runs-on: windows-latest
     needs: test
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -454,30 +475,3 @@ jobs:
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-  cleanup-pr-artifacts:
-    name: Cleanup PR Artifacts
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete PR artifacts
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const prefix = `pr-${context.payload.pull_request.number}`;
-            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-            });
-            for (const artifact of artifacts) {
-              if (artifact.name && artifact.name.startsWith(prefix)) {
-                core.info(`Deleting artifact ${artifact.name}`);
-                await github.rest.actions.deleteArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                });
-              }
-            }
