@@ -256,25 +256,14 @@ jobs:
           cd build/ios/iphoneos
           zip -rq ../../../ios-Runner.zip Runner.app
 
-      - name: Build macOS
-        run: |
-          flutter config --enable-macos-desktop
-          flutter build macos --release
+      - name: Enable macOS desktop target
+        run: flutter config --enable-macos-desktop
 
-      - name: Package macOS app
+      - name: Package macOS app (zip + dmg)
         run: |
-          cd build/macos/Build/Products/Release
-          shopt -s nullglob
-          apps=( *.app )
-          if [ ${#apps[@]} -eq 0 ]; then
-            echo "No .app bundle found in $(pwd)"
-            ls -la
-            exit 1
-          fi
-
-          app_path="${apps[0]}"
-          echo "Zipping macOS app bundle: ${app_path}"
-          ditto -c -k --sequesterRsrc --keepParent "$app_path" "../../../../../macos-${{ matrix.slug }}.zip"
+          scripts/package_macos.sh
+          cp build/artifacts/flutter_starter-macos.zip macos-${{ matrix.slug }}.zip
+          cp build/artifacts/flutter_starter-macos.dmg macos-${{ matrix.slug }}.dmg
 
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v5
@@ -283,6 +272,7 @@ jobs:
           path: |
             ios-Runner.zip
             macos-${{ matrix.slug }}.zip
+            macos-${{ matrix.slug }}.dmg
 
   windows-build:
     name: Build (Windows)
@@ -420,6 +410,9 @@ jobs:
           fi
           if compgen -G "artifacts/apple/macos-*.zip" > /dev/null; then
             cp artifacts/apple/macos-*.zip release/
+          fi
+          if compgen -G "artifacts/apple/macos-*.dmg" > /dev/null; then
+            cp artifacts/apple/macos-*.dmg release/
           fi
 
       - name: Create GitHub release

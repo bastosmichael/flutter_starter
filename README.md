@@ -129,6 +129,14 @@ flutter build windows --release
 flutter build macos --release
 ```
 
+To create a shareable macOS artifact that opens without additional signing steps, run the packaging script on a macOS machine:
+
+```bash
+./scripts/package_macos.sh
+```
+
+The script cleans the project, builds the release app, strips quarantine metadata, applies ad-hoc signing, and zips the bundle to `build/artifacts/flutter_starter-macos.zip` for distribution.
+
 #### Linux
 ```bash
 flutter build linux --release
@@ -220,7 +228,26 @@ This project is open source and available under the [MIT License](LICENSE).
 If you have any questions or run into issues, please open an issue on GitHub.
 
 ## 🔧 Troubleshooting
- 
+
+ ### macOS download shows "Apple could not verify..." dialog
+
+ When macOS shows a warning that **"flutter_starter" cannot be opened because Apple cannot check it for malicious software**, the app
+ hasn't been notarized. You can still run it by explicitly trusting the binary:
+
+ 1. Right-click the `flutter_starter` app in Finder and choose **Open**.
+ 2. When the confirmation dialog appears, choose **Open** again.
+ 3. If you already dismissed the dialog, go to **System Settings › Privacy & Security** and click **Open Anyway** next to
+    `flutter_starter`.
+
+You can also remove the download quarantine flag from the command line:
+
+```bash
+xattr -d com.apple.quarantine /path/to/flutter_starter.app
+open /path/to/flutter_starter.app
+```
+
+If the app was downloaded as a ZIP, unzip it to a trusted location (e.g., `~/Applications`) before running the commands above.
+
  ### macOS Build Issues
  
  #### CodeSign Failed: "resource fork, Finder information, or similar detritus not allowed"
