@@ -239,12 +239,16 @@ If you have any questions or run into issues, please open an issue on GitHub.
      flutter run -d macos
      ```
  
- 3.  **If the error persists**, run the following commands to manually strip the attributes and re-sign the app:
+ 3.  **If the error persists**, run the following commands. This often happens when moving files between file systems (e.g., iCloud Drive, external drives), leaving "dot underscore" (._*) files that confuse the code signer.
+ 
      ```bash
      # Navigate to your project root
      cd path/to/flutter_starter
      
-     # Strip extended attributes from the built app
+     # Merge standard file system forks (removes ._* files)
+     dot_clean build/macos/Build/Products/Debug/flutter_starter.app
+     
+     # Strip extended attributes and quarantine info
      xattr -cr build/macos/Build/Products/Debug/flutter_starter.app
      
      # Force re-sign the app
