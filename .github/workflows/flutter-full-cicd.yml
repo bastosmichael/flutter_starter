@@ -325,21 +325,22 @@ jobs:
           flutter build windows --release
 
       - name: Package Windows build
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          workspace_zip="${GITHUB_WORKSPACE}/windows-bundle.zip"
-          release_dir=$(ls -d build/windows/*/runner/Release build/windows/runner/Release 2>/dev/null | head -n 1 || true)
+          $ErrorActionPreference = 'Stop'
 
-          if [[ -z "${release_dir}" ]]; then
-            echo "Could not find Windows release output under build/windows. Contents:" >&2
-            find build/windows -maxdepth 3 -type d -print || true
-            exit 1
-          fi
+          $workspaceZip = Join-Path $env:GITHUB_WORKSPACE 'windows-bundle.zip'
+          $releaseDir = Get-ChildItem -Path 'build/windows' -Directory -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "[\\/]runner[\\/]Release$" } |
+            Select-Object -ExpandProperty FullName -First 1
 
-          echo "Packaging Windows build from: ${release_dir}"
-          cd "${release_dir}"
-          zip -rq "${workspace_zip}" .
+          if (-not $releaseDir) {
+            Write-Error "Could not find Windows release output under build/windows. Contents:"
+            Get-ChildItem -Path 'build/windows' -Directory -Recurse | Select-Object -ExpandProperty FullName
+          }
+
+          Write-Host "Packaging Windows build from: $releaseDir"
+          Compress-Archive -Path (Join-Path $releaseDir '*') -DestinationPath $workspaceZip -Force
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v5
