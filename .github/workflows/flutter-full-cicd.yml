@@ -25,33 +25,6 @@ env:
   ARTIFACT_PREFIX: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
 
 jobs:
-  cleanup-pr-artifacts:
-    name: Cleanup PR Artifacts
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete PR artifacts
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const prefix = `pr-${context.payload.pull_request.number}`;
-            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-            });
-            for (const artifact of artifacts) {
-              if (artifact.name && artifact.name.startsWith(prefix)) {
-                core.info(`Deleting artifact ${artifact.name}`);
-                await github.rest.actions.deleteArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                });
-              }
-            }
-
   lint:
     name: Lint (Flutter)
     runs-on: ubuntu-latest
@@ -475,3 +448,30 @@ jobs:
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  cleanup-pr-artifacts:
+    name: Cleanup PR Artifacts
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete PR artifacts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prefix = `pr-${context.payload.pull_request.number}`;
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            for (const artifact of artifacts) {
+              if (artifact.name && artifact.name.startsWith(prefix)) {
+                core.info(`Deleting artifact ${artifact.name}`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
