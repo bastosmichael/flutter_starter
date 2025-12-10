@@ -219,19 +219,54 @@ This project is open source and available under the [MIT License](LICENSE).
 
 If you have any questions or run into issues, please open an issue on GitHub.
 
-## 🎯 Next Steps
-
-This starter provides a solid foundation. Here are some suggested enhancements:
-
-- Add authentication (Firebase Auth, OAuth)
-- Implement local storage (Hive, SharedPreferences)
-- Add network requests (Dio, HTTP)
-- Implement offline support
-- Add internationalization (i18n)
-- Include animations and transitions
-- Add error handling and logging
-- Implement CI/CD pipelines
-
----
-
-Made with ❤️ using Flutter
+## 🔧 Troubleshooting
+ 
+ ### macOS Build Issues
+ 
+ #### CodeSign Failed: "resource fork, Finder information, or similar detritus not allowed"
+ 
+ If you encounter a `CodeSign failed with a nonzero exit code` error during `flutter run -d macos` or `flutter build macos`, it is likely due to extended attributes (like `com.apple.provenance`) on files in the build directory or standard library packages.
+ 
+ **Fix:**
+ 
+ 1.  Clean the project:
+     ```bash
+     flutter clean
+     ```
+ 
+ 2.  Attempt to run normally:
+     ```bash
+     flutter run -d macos
+     ```
+ 
+ 3.  **If the error persists**, run the following commands to manually strip the attributes and re-sign the app:
+     ```bash
+     # Navigate to your project root
+     cd path/to/flutter_starter
+     
+     # Strip extended attributes from the built app
+     xattr -cr build/macos/Build/Products/Debug/flutter_starter.app
+     
+     # Force re-sign the app
+     codesign --force --deep --sign - build/macos/Build/Products/Debug/flutter_starter.app
+     
+     # Open the app manually
+     open build/macos/Build/Products/Debug/flutter_starter.app
+     ```
+ 
+ ## 🎯 Next Steps
+ 
+ This starter provides a solid foundation. Here are some suggested enhancements:
+ 
+ - Add authentication (Firebase Auth, OAuth)
+ - Implement local storage (Hive, SharedPreferences)
+ - Add network requests (Dio, HTTP)
+ - Implement offline support
+ - Add internationalization (i18n)
+ - Include animations and transitions
+ - Add error handling and logging
+ - Implement CI/CD pipelines
+ 
+ ---
+ 
+ Made with ❤️ using Flutter
