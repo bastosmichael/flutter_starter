@@ -246,7 +246,7 @@ If you have any questions or run into issues, please open an issue on GitHub.
      cd path/to/flutter_starter
      
      # Merge standard file system forks (removes ._* files)
-     dot_clean build/macos/Build/Products/Debug/flutter_starter.app
+     dot_clean -m build/macos/Build/Products/Debug/flutter_starter.app
      
      # Strip extended attributes and quarantine info
      xattr -cr build/macos/Build/Products/Debug/flutter_starter.app

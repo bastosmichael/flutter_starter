@@ -345,7 +345,7 @@ files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "APP_BUNDLE_PATH=\"$CODESIGNING_FOLDER_PATH\"\nif [ -z \"$APP_BUNDLE_PATH\" ]; then\n  APP_BUNDLE_PATH=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME:-${PRODUCT_NAME}.app}\"\nfi\n\nif [ -d \"$APP_BUNDLE_PATH\" ]; then\n  /usr/bin/xattr -cr \"$APP_BUNDLE_PATH\"\nelse\n  echo \"Remove Extended Attributes: bundle not found at $APP_BUNDLE_PATH\" 1>&2\nfi\n";
+			shellScript = "APP_BUNDLE_PATH=\"$CODESIGNING_FOLDER_PATH\"\nif [ -z \"$APP_BUNDLE_PATH\" ]; then\n  APP_BUNDLE_PATH=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME:-${PRODUCT_NAME}.app}\"\nfi\n\nif [ -d \"$APP_BUNDLE_PATH\" ]; then\n  echo \"Cleaning extended attributes and resource forks from $APP_BUNDLE_PATH\"\n  /usr/sbin/dot_clean -m \"$APP_BUNDLE_PATH\"\n  /usr/bin/xattr -cr \"$APP_BUNDLE_PATH\"\n  echo \"Signing app bundle manually to ensure validity\"\n  /usr/bin/codesign --force --deep --sign - \"$APP_BUNDLE_PATH\"\nelse\n  echo \"Remove Extended Attributes: bundle not found at $APP_BUNDLE_PATH\" 1>&2\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
