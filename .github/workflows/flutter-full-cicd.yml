@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, closed ]
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Create GitHub release"
+        type: boolean
+        default: false
 
 permissions:
   actions: write
@@ -362,7 +367,8 @@ jobs:
     name: Release Assets
     needs: [linux-and-web-builds, android-build, apple-builds, windows-build]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch' && inputs.release == true)
     steps:
       - name: Checkout
         uses: actions/checkout@v6
