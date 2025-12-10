@@ -311,10 +311,10 @@
                         shellScript = "echo \"$PRODUCT_NAME.app\" > \"$PROJECT_DIR\"/Flutter/ephemeral/.app_filename && \"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh embed\n";
                 };
                 33CC111E2044C6BF0003C045 /* ShellScript */ = {
-                        isa = PBXShellScriptBuildPhase;
-                        buildActionMask = 2147483647;
-                        files = (
-                        );
+isa = PBXShellScriptBuildPhase;
+buildActionMask = 2147483647;
+files = (
+);
                         inputFileListPaths = (
                                 Flutter/ephemeral/FlutterInputs.xcfilelist,
                         );
@@ -339,14 +339,14 @@
                         );
                         inputPaths = (
                         );
-                        outputFileListPaths = (
-                        );
-                        outputPaths = (
-                        );
-                        runOnlyForDeploymentPostprocessing = 0;
-                        shellPath = /bin/sh;
-                        shellScript = "if [ -n \"$CODESIGNING_FOLDER_PATH\" ] && [ -d \"$CODESIGNING_FOLDER_PATH\" ]; then\n  /usr/bin/xattr -cr \"$CODESIGNING_FOLDER_PATH\"\nfi\n";
-                };
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "APP_BUNDLE_PATH=\"$CODESIGNING_FOLDER_PATH\"\nif [ -z \"$APP_BUNDLE_PATH\" ]; then\n  APP_BUNDLE_PATH=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME:-${PRODUCT_NAME}.app}\"\nfi\n\nif [ -d \"$APP_BUNDLE_PATH\" ]; then\n  /usr/bin/xattr -cr \"$APP_BUNDLE_PATH\"\nelse\n  echo \"Remove Extended Attributes: bundle not found at $APP_BUNDLE_PATH\" 1>&2\nfi\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
