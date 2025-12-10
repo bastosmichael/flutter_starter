@@ -318,8 +318,19 @@ jobs:
       - name: Package Windows build
         shell: bash
         run: |
-          cd build/windows/runner/Release
-          zip -rq ../../../../windows-bundle.zip .
+          set -euo pipefail
+          workspace_zip="${GITHUB_WORKSPACE}/windows-bundle.zip"
+          release_dir=$(ls -d build/windows/*/runner/Release build/windows/runner/Release 2>/dev/null | head -n 1 || true)
+
+          if [[ -z "${release_dir}" ]]; then
+            echo "Could not find Windows release output under build/windows. Contents:" >&2
+            find build/windows -maxdepth 3 -type d -print || true
+            exit 1
+          fi
+
+          echo "Packaging Windows build from: ${release_dir}"
+          cd "${release_dir}"
+          zip -rq "${workspace_zip}" .
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v5
