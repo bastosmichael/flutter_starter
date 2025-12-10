@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main, master ]
   pull_request:
+    types: [ opened, synchronize, reopened, closed ]
   workflow_dispatch:
 
 permissions:
@@ -20,11 +21,13 @@ env:
   AWS_REGION: us-west-2
   AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
   AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+  ARTIFACT_PREFIX: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
 
 jobs:
   lint:
     name: Lint (Flutter)
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -56,6 +59,7 @@ jobs:
     name: Test (Flutter)
     runs-on: ubuntu-latest
     needs: lint
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -87,6 +91,7 @@ jobs:
     name: Build (Linux & Web)
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -121,19 +126,35 @@ jobs:
           flutter config --enable-linux-desktop
           flutter build linux --release
 
+      - name: Package Linux bundle
+        run: |
+          tar -czf linux-bundle.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-linux
+          path: linux-bundle.tar.gz
+
       - name: Build Web
         run: flutter build web --release
+
+      - name: Package web build
+        run: |
+          cd build/web
+          zip -rq ../../web-build.zip .
 
       - name: Upload web artifact
         uses: actions/upload-artifact@v5
         with:
-          name: flutter-web
-          path: build/web
+          name: ${{ env.ARTIFACT_PREFIX }}-web
+          path: web-build.zip
 
   android-build:
     name: Build (Android)
     runs-on: ubuntu-latest
     needs: test
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -180,10 +201,20 @@ jobs:
       - name: Build Android APK
         run: flutter build apk --release
 
+      - name: Copy Android APK to artifact root
+        run: cp build/app/outputs/flutter-apk/app-release.apk app-release.apk
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-android-apk
+          path: app-release.apk
+
   apple-builds:
     name: Build (iOS & macOS - ${{ matrix.label }})
     runs-on: ${{ matrix.runner }}
     needs: test
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     strategy:
       fail-fast: false
       matrix:
@@ -222,15 +253,35 @@ jobs:
       - name: Build iOS (no codesign)
         run: flutter build ios --no-codesign
 
+      - name: Package iOS app
+        run: |
+          cd build/ios/iphoneos
+          zip -rq ../../../ios-Runner.zip Runner.app
+
       - name: Build macOS
         run: |
           flutter config --enable-macos-desktop
           flutter build macos --release
 
+      - name: Package macOS app
+        run: |
+          cd build/macos/Build/Products/Release
+          app_path=$(ls *.app | head -n 1)
+          zip -rq ../../../../macos-${{ matrix.label }}.zip "$app_path"
+
+      - name: Upload Apple artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.label }}-apple
+          path: |
+            ios-Runner.zip
+            macos-${{ matrix.label }}.zip
+
   windows-build:
     name: Build (Windows)
     runs-on: windows-latest
     needs: test
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -262,6 +313,18 @@ jobs:
           flutter config --enable-windows-desktop
           flutter build windows --release
 
+      - name: Package Windows build
+        shell: bash
+        run: |
+          cd build/windows/runner/Release
+          zip -rq ../../../../windows-bundle.zip .
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-windows
+          path: windows-bundle.zip
+
   deploy-web:
     name: Deploy Web (GitHub Pages)
     runs-on: ubuntu-latest
@@ -274,14 +337,82 @@ jobs:
       - name: Download web artifact
         uses: actions/download-artifact@v6
         with:
-          name: flutter-web
+          name: ${{ env.ARTIFACT_PREFIX }}-web
           path: build/web
+
+      - name: Unpack web artifact
+        working-directory: build/web
+        run: unzip web-build.zip
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web/
+
+  release:
+    name: Release Assets
+    needs: [linux-and-web-builds, android-build, apple-builds, windows-build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-linux
+          path: artifacts/linux
+
+      - name: Download Web artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-web
+          path: artifacts/web
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-android-apk
+          path: artifacts/android
+
+      - name: Download Apple artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: ${{ env.ARTIFACT_PREFIX }}-*-apple
+          path: artifacts/apple
+          merge-multiple: true
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ env.ARTIFACT_PREFIX }}-windows
+          path: artifacts/windows
+
+      - name: Assemble release payloads
+        run: |
+          mkdir -p release
+          cp artifacts/linux/linux-bundle.tar.gz release/
+          cp artifacts/web/web-build.zip release/
+          cp artifacts/android/app-release.apk release/
+          cp artifacts/windows/windows-bundle.zip release/
+          if compgen -G "artifacts/apple/ios-Runner.zip" > /dev/null; then
+            cp artifacts/apple/ios-Runner.zip release/
+          fi
+          if compgen -G "artifacts/apple/macos-*.zip" > /dev/null; then
+            cp artifacts/apple/macos-*.zip release/
+          fi
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Automated Build ${{ github.run_number }}
+          files: release/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
 
   dependabot:
     name: Dependabot
@@ -299,3 +430,30 @@ jobs:
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  cleanup-pr-artifacts:
+    name: Cleanup PR Artifacts
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete PR artifacts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prefix = `pr-${context.payload.pull_request.number}`;
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            for (const artifact of artifacts) {
+              if (artifact.name && artifact.name.startsWith(prefix)) {
+                core.info(`Deleting artifact ${artifact.name}`);
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }
