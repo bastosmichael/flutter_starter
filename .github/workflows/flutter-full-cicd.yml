@@ -268,8 +268,17 @@ jobs:
       - name: Package macOS app
         run: |
           cd build/macos/Build/Products/Release
-          app_path=$(ls *.app | head -n 1)
-          zip -rq ../../../../macos-${{ matrix.slug }}.zip "$app_path"
+          shopt -s nullglob
+          apps=( *.app )
+          if [ ${#apps[@]} -eq 0 ]; then
+            echo "No .app bundle found in $(pwd)"
+            ls -la
+            exit 1
+          fi
+
+          app_path="${apps[0]}"
+          echo "Zipping macOS app bundle: ${app_path}"
+          ditto -c -k --sequesterRsrc --keepParent "$app_path" "../../../../../macos-${{ matrix.slug }}.zip"
 
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v5
