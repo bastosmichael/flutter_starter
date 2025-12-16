@@ -348,7 +348,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download web artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-web
           path: build/web
@@ -374,32 +374,32 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download Linux artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-linux
           path: artifacts/linux
 
       - name: Download Web artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-web
           path: artifacts/web
 
       - name: Download Android artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-android-apk
           path: artifacts/android
 
       - name: Download Apple artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ env.ARTIFACT_PREFIX }}-*-apple
           path: artifacts/apple
           merge-multiple: true
 
       - name: Download Windows artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-windows
           path: artifacts/windows
