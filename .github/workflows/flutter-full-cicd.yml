@@ -134,7 +134,7 @@ jobs:
           tar -czf linux-bundle.tar.gz -C build/linux/x64/release/bundle .
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-linux
           path: linux-bundle.tar.gz
@@ -148,7 +148,7 @@ jobs:
           zip -rq ../../web-build.zip .
 
       - name: Upload web artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-web
           path: web-build.zip
@@ -207,7 +207,7 @@ jobs:
         run: cp build/app/outputs/flutter-apk/app-release.apk app-release.apk
 
       - name: Upload Android artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-android-apk
           path: app-release.apk
@@ -271,7 +271,7 @@ jobs:
           cp build/artifacts/flutter_starter-macos.dmg macos-${{ matrix.slug }}.dmg
 
       - name: Upload Apple artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-${{ matrix.slug }}-apple
           path: |
@@ -333,7 +333,7 @@ jobs:
           Compress-Archive -Path (Join-Path $releaseDir '*') -DestinationPath $workspaceZip -Force
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_PREFIX }}-windows
           path: windows-bundle.zip
